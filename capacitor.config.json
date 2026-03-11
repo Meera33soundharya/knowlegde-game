@@ -1,0 +1,6 @@
+{
+  "appId": "com.knowledgegame.app",
+  "appName": "Knowledge Game",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

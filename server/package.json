@@ -1,0 +1,24 @@
+{
+  "name": "studyhub-server",
+  "version": "1.0.0",
+  "description": "Backend API server for Student Study Hub",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "keywords": ["education", "ai", "quiz", "study", "learning"],
+  "author": "Student Study Hub",
+  "license": "MIT"
+}

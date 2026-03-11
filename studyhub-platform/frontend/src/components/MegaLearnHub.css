@@ -1,0 +1,453 @@
+/* MegaLearnHub.css */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+.mega-hub-wrapper {
+    --neon-green: #39ff14;
+    --electric-blue: #00f3ff;
+    --hot-pink: #ff10f0;
+    --cyber-yellow: #fffc00;
+    --deep-purple: #1a0033;
+    --dark-bg: #0a0015;
+    --card-bg: #1a0f2e;
+    --border-color: #39ff14;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --success: #00ff88;
+    --danger: #ff3366;
+    --warning: #ffa500;
+    --info: #00f3ff;
+
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--dark-bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+/* Animated Grid Background */
+.mega-hub-wrapper::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(rgba(57, 255, 20, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57, 255, 20, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Glowing Orbs */
+.mega-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.3;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.orb-1 {
+    width: 500px;
+    height: 500px;
+    background: var(--hot-pink);
+    top: 10%;
+    left: 10%;
+    animation: float 15s ease-in-out infinite;
+}
+
+.orb-2 {
+    width: 400px;
+    height: 400px;
+    background: var(--electric-blue);
+    bottom: 10%;
+    right: 10%;
+    animation: float 20s ease-in-out infinite reverse;
+}
+
+.orb-3 {
+    width: 300px;
+    height: 300px;
+    background: var(--neon-green);
+    top: 50%;
+    left: 50%;
+    animation: float 18s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(100px, -50px) scale(1.2);
+    }
+
+    66% {
+        transform: translate(-50px, 100px) scale(0.8);
+    }
+}
+
+.mega-container {
+    max-width: 1400px;
+    /* Constrain width slightly for better reading */
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Header */
+.mega-header {
+    text-align: center;
+    padding: 40px 20px;
+    margin-bottom: 30px;
+}
+
+.mega-logo {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    background: linear-gradient(45deg, var(--neon-green), var(--electric-blue), var(--hot-pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 80px var(--neon-green);
+    margin-bottom: 10px;
+}
+
+.mega-tagline {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--electric-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+}
+
+/* Stats Bar */
+.mega-stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.mega-stat-card {
+    background: transparent;
+    border: 2px solid var(--neon-green);
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.mega-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--neon-green);
+    margin-bottom: 5px;
+}
+
+.mega-stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+}
+
+/* Navigation */
+.mega-nav-container {
+    background: transparent;
+    border: 2px solid var(--neon-green);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.mega-nav-tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+.mega-nav-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 5px;
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 80px;
+}
+
+.mega-nav-tab:hover,
+.mega-nav-tab.active {
+    background: var(--neon-green);
+    color: black;
+    border-color: var(--neon-green);
+    box-shadow: 0 0 15px var(--neon-green);
+}
+
+/* Card Styles */
+.mega-card {
+    background: transparent;
+    border: 2px solid var(--neon-green);
+    padding: 40px;
+    margin-bottom: 30px;
+    position: relative;
+    min-height: 600px;
+    /* Ensure consistent height */
+}
+
+.mega-card-header {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 2.5rem;
+    color: var(--neon-green);
+    margin-bottom: 30px;
+    text-align: center;
+    letter-spacing: 0.1em;
+}
+
+/* Flashcard Specifics */
+.mega-flashcard-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.mega-flashcard-container {
+    perspective: 1000px;
+    width: 600px;
+    height: 350px;
+}
+
+.mega-flashcard {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+    cursor: pointer;
+    border: 2px solid var(--neon-green);
+}
+
+.mega-flashcard.flipped {
+    transform: rotateY(180deg);
+}
+
+.mega-flashcard-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--dark-bg);
+}
+
+
+
+.mega-flashcard-back {
+    transform: rotateY(180deg);
+    background: #111;
+}
+
+.mega-flashcard-text {
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    text-align: center;
+    color: white;
+}
+
+.mega-flashcard-hint {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    opacity: 0.6;
+    text-transform: uppercase;
+}
+
+/* Controls Area */
+.mega-fc-controls-area {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.mega-fc-nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.mega-fc-counter {
+    background: #000;
+    border: 2px solid var(--electric-blue);
+    padding: 5px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.mega-btn-mini {
+    background: transparent;
+    border: 2px solid var(--electric-blue);
+    color: var(--electric-blue);
+    padding: 5px 15px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.mega-btn-mini:hover {
+    background: var(--electric-blue);
+    color: black;
+}
+
+.mega-fc-action-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.mega-btn-action {
+    flex: 1;
+    padding: 15px;
+    font-weight: 900;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.mega-btn-action:hover {
+    transform: translateY(-2px);
+}
+
+.mega-btn-action.success {
+    background: var(--success);
+    color: black;
+    box-shadow: 0 4px 0 #00cc6a;
+}
+
+.mega-btn-action.danger {
+    background: var(--danger);
+    color: white;
+    box-shadow: 0 4px 0 #cc0033;
+}
+
+.mega-btn-action.info {
+    background: transparent;
+    border: 2px solid var(--electric-blue);
+    color: var(--electric-blue);
+    box-shadow: 0 4px 0 #00aab5;
+}
+
+/* Footer Stats */
+.mega-fc-footer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    border-top: 1px solid #333;
+    padding-top: 30px;
+}
+
+.mega-fc-stat-box {
+    border: 2px solid var(--neon-green);
+    padding: 15px;
+    text-align: center;
+}
+
+.mega-fc-stat-box .value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 5px;
+    color: var(--neon-green);
+}
+
+.mega-fc-stat-box .value.success-text {
+    color: var(--success);
+}
+
+.mega-fc-stat-box .value.danger-text {
+    color: var(--danger);
+}
+
+.mega-fc-stat-box .label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    opacity: 0.7;
+}
+
+/* Difficulty Buttons */
+.mega-diff-select {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+.mega-diff-btn {
+    padding: 5px 20px;
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.mega-diff-btn.selected {
+    background: var(--neon-green);
+    color: black;
+    border-color: var(--neon-green);
+}
+
+/* Other Common Inputs */
+.mega-input {
+    width: 100%;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid #444;
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.mega-input:focus {
+    outline: none;
+    border-color: var(--electric-blue);
+}

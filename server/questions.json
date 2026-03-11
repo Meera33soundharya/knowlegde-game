@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "question": "What is the capital of France?",
+    "options": ["Paris", "London", "Berlin", "Rome"],
+    "answer": "Paris",
+    "explanation": "Paris is the capital and largest city of France, known for the Eiffel Tower and Louvre Museum."
+  },
+  {
+    "id": 2,
+    "question": "What gas do plants absorb during photosynthesis?",
+    "options": ["Carbon dioxide", "Oxygen", "Nitrogen", "Hydrogen"],
+    "answer": "Carbon dioxide",
+    "explanation": "Plants absorb CO2 from the atmosphere and convert it into glucose and oxygen using sunlight."
+  },
+  {
+    "id": 3,
+    "question": "How many continents are there?",
+    "options": ["Seven", "Five", "Six", "Eight"],
+    "answer": "Seven",
+    "explanation": "The seven continents are Africa, Antarctica, Asia, Europe, North America, Oceania, and South America."
+  },
+  {
+    "id": 4,
+    "question": "Which planet is known as the Red Planet?",
+    "options": ["Mars", "Venus", "Jupiter", "Saturn"],
+    "answer": "Mars",
+    "explanation": "Mars appears red due to iron oxide (rust) on its surface, giving it its distinctive color."
+  },
+  {
+    "id": 5,
+    "question": "What is the largest planet in our solar system?",
+    "options": ["Jupiter", "Saturn", "Earth", "Neptune"],
+    "answer": "Jupiter",
+    "explanation": "Jupiter is a gas giant and the largest planet, with a mass greater than all other planets combined."
+  },
+  {
+    "id": 6,
+    "question": "What is the chemical symbol for water?",
+    "options": ["H2O", "CO2", "O2", "H2SO4"],
+    "answer": "H2O",
+    "explanation": "Water consists of two hydrogen atoms bonded to one oxygen atom, hence H2O."
+  },
+  {
+    "id": 7,
+    "question": "Who wrote 'Romeo and Juliet'?",
+    "options": ["William Shakespeare", "Charles Dickens", "Jane Austen", "Mark Twain"],
+    "answer": "William Shakespeare",
+    "explanation": "Romeo and Juliet is one of Shakespeare's most famous tragedies, written in the early part of his career."
+  },
+  {
+    "id": 8,
+    "question": "What is the speed of light in vacuum?",
+    "options": ["299,792,458 m/s", "300,000,000 m/s", "150,000,000 m/s", "500,000,000 m/s"],
+    "answer": "299,792,458 m/s",
+    "explanation": "The speed of light in vacuum is exactly 299,792,458 meters per second, a fundamental constant in physics."
+  },
+  {
+    "id": 9,
+    "question": "Which programming language is known for 'write once, run anywhere'?",
+    "options": ["Java", "Python", "C++", "JavaScript"],
+    "answer": "Java",
+    "explanation": "Java's motto 'write once, run anywhere' refers to its platform independence through the Java Virtual Machine."
+  },
+  {
+    "id": 10,
+    "question": "What is the powerhouse of the cell?",
+    "options": ["Mitochondria", "Nucleus", "Ribosome", "Chloroplast"],
+    "answer": "Mitochondria",
+    "explanation": "Mitochondria generate most of the cell's ATP (energy), earning them the nickname 'powerhouse of the cell'."
+  }
+]
