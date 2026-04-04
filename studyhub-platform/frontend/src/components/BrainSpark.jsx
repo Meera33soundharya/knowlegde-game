@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import './BrainSpark.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Zap, Brain, Calendar, Target, Activity, MessageSquare,
+    Send, Sparkles, CheckCircle, ArrowRight, RefreshCw, Terminal,
+    Database, Cpu, Clock, Layout, ChevronRight, Award
+} from 'lucide-react';
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -36,25 +41,18 @@ const BrainSpark = () => {
     const chatContainerRef = useRef(null);
 
     // --- EFFECTS ---
-    // --- EFFECTS ---
     useEffect(() => {
-        // Load data from Backend
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('token');
-
-                // If logged in, fetch from API
                 if (token) {
                     const [attemptsRes, sessionsRes] = await Promise.all([
                         axios.get(`${API_URL}/quiz/attempts`),
                         axios.get(`${API_URL}/study/sessions`)
                     ]);
-
                     const attempts = attemptsRes.data || [];
                     const sessions = sessionsRes.data || [];
-
-                    // Calculate stats
-                    const totalScore = attempts.reduce((acc, curr) => acc + curr.score, 0);
+                    const totalScore = attempts.reduce((acc, curr) => acc + (curr.score || 0), 0);
 
                     setState(prev => ({
                         ...prev,
@@ -66,480 +64,296 @@ const BrainSpark = () => {
                         })),
                         totalScore: totalScore,
                         aiSessions: attempts.length + sessions.length,
-                        // Simple streak calc (unique days)
                         streak: new Set([...attempts, ...sessions].map(i => i.created_at || i.completed_at).map(d => d && d.split('T')[0])).size
                     }));
-                } else {
-                    // Fallback to local storage
-                    const saved = localStorage.getItem('brainSparkAI');
-                    if (saved) setState({ ...INITIAL_STATE, ...JSON.parse(saved) });
                 }
             } catch (error) {
                 console.error("Backend sync failed", error);
-                const saved = localStorage.getItem('brainSparkAI');
-                if (saved) setState({ ...INITIAL_STATE, ...JSON.parse(saved) });
             }
         };
         fetchData();
-
-        // Date Init
         const today = new Date();
         today.setDate(today.getDate() + 7);
         setPlanForm(prev => ({ ...prev, date: today.toISOString().split('T')[0] }));
     }, []);
 
-    useEffect(() => {
-        localStorage.setItem('brainSparkAI', JSON.stringify(state));
-    }, [state]);
-
-    useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    }, [tutorMessages]);
-
-    // --- AI SIMULATION HELPERS ---
-    // In a production app, these would call your backend which would call Anthropic/OpenAI
-    const callAI = async (prompt) => {
+    const callAI = async () => {
         setLoading(true);
-        // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1500));
         setLoading(false);
-
-        // This is where you would do: axios.post('/api/ai', { prompt })
-        // For now, we return intelligent mock responses based on the prompt content.
         return true;
     };
 
-    // --- PLANNER ---
     const generateAIStudyPlan = async () => {
-        if (!planForm.subject || !planForm.date || !planForm.goal) return alert('Please fill in all fields');
-
+        if (!planForm.subject || !planForm.date || !planForm.goal) return;
         await callAI();
-        const days = Math.ceil((new Date(planForm.date) - new Date()) / (1000 * 60 * 60 * 24));
-
         const planText = `
-### 📅 Personalized Study Plan: ${planForm.subject}
-**Goal:** ${planForm.goal}
-**Timeline:** ${days} days until target
+### 📅 STRATEGIC_PLAN: ${planForm.subject.toUpperCase()}
+**OBJ:** ${planForm.goal}
 
-#### Phase 1: Foundation (Days 1-${Math.max(1, Math.floor(days / 3))})
-*   **Core Concepts**: Review fundamental definitions and theories.
-*   **Reading**: Focused reading on ${planForm.subject} basics.
-*   **Daily Goal**: 45 mins active reading + 15 mins summarization.
+#### PHASE_01: FOUNDATION_SYNC
+*   Master core definitions and theoretical frameworks.
+*   Review primary source material and baseline documentation.
 
-#### Phase 2: Deep Dive (Days ${Math.floor(days / 3) + 1}-${Math.floor(2 * days / 3)})
-*   **Application**: Solve practice problems and case studies.
-*   **Active Recall**: Test yourself without looking at notes.
-*   **Daily Goal**: 1 hour problem solving.
+#### PHASE_02: DEEP_INTEGRATION
+*   Execution of complex problem sets and scenario simulations.
+*   Active recall sessions focused on cross-modular testing.
 
-#### Phase 3: Mastery & Review (Final Days)
-*   **Mock Exams**: Simulate exam conditions.
-*   **Weakness Targeting**: Focus only on incorrectly answered topics.
-*   **Daily Goal**: Full practice tests + review.
-
-#### 💡 Study Tips for You:
-*   Use the **Pomodoro Timer** in BrainSpark to stay focused.
-*   Explain concepts out loud (Feynman Technique) to verify understanding.
+#### PHASE_03: FINAL_MASTERY
+*   High-fidelity mock exams under standard node constraints.
+*   Targeting detected weaknesses with recursive review.
 `;
         setPlanResult(planText);
         setState(prev => ({ ...prev, aiSessions: prev.aiSessions + 1 }));
     };
 
-    // --- QUIZ ---
     const startAIQuiz = async () => {
-        if (!quizForm.topic) return alert('Please enter a topic');
-
+        if (!quizForm.topic) return;
         await callAI();
-
-        // Mock Quiz Generation
         const mockQuestions = Array.from({ length: quizForm.count }).map((_, i) => ({
-            question: `Question ${i + 1} about ${quizForm.topic} generated by AI?`,
-            options: [
-                `Correct Answer for Q${i + 1}`,
-                `Distractor A`,
-                `Distractor B`,
-                `Distractor C`
-            ],
-            correct: 0, // In real AI, this would be dynamic
-            explanation: `This is the correct answer because it directly addresses the core concept of ${quizForm.topic} in the context of the question.`
-        })).map(q => ({ ...q, options: q.options.sort(() => Math.random() - 0.5) }));
-
-        // Fix correct index after shuffle
-        mockQuestions.forEach(q => {
-            const correctText = `Correct Answer`;
-            q.correct = q.options.findIndex(o => o.includes('Correct'));
-        });
-
-        setCurrentQuiz({
-            ...quizForm,
-            questions: mockQuestions,
-            currentIndex: 0,
-            score: 0,
-            answers: []
-        });
-        setQuizFinished(false);
+            question: `QUERY_${i + 1}: Analyze the core principle of ${quizForm.topic} in a production environment.`,
+            options: [`VALIDATE_TRUE`, `ERR_DIST_A`, `ERR_DIST_B`, `ERR_DIST_C`],
+            correct: 0,
+            explanation: `The value is validated by cross-referencing node-state with the ${quizForm.topic} primary database.`
+        }));
+        setCurrentQuiz({ ...quizForm, questions: mockQuestions, currentIndex: 0, score: 0, answers: [] });
     };
 
     const handleAnswer = (idx) => {
         const q = currentQuiz.questions[currentQuiz.currentIndex];
         const isCorrect = idx === q.correct;
-
         const newScore = isCorrect ? currentQuiz.score + 10 : currentQuiz.score;
         const newAnswers = [...currentQuiz.answers, { isCorrect, selected: idx }];
-
-        setCurrentQuiz(prev => ({
-            ...prev,
-            score: newScore,
-            answers: newAnswers
-        }));
-    };
-
-    const nextQuestion = () => {
-        if (currentQuiz.currentIndex + 1 < currentQuiz.questions.length) {
-            setCurrentQuiz(prev => ({ ...prev, currentIndex: prev.currentIndex + 1 }));
-        } else {
-            finishQuiz();
+        setCurrentQuiz(prev => ({ ...prev, score: newScore, answers: newAnswers }));
+        if (currentQuiz.currentIndex + 1 === currentQuiz.questions.length) {
+            setQuizFinished(true);
+            setState(prev => ({ ...prev, aiSessions: prev.aiSessions + 1, totalScore: prev.totalScore + newScore }));
         }
     };
 
-    const finishQuiz = async () => {
-        setQuizFinished(true);
-        const correctCount = currentQuiz.answers.filter(a => a.isCorrect).length;
-        const percentage = Math.round((correctCount / currentQuiz.questions.length) * 100);
-
-        const newEntry = {
-            topic: currentQuiz.topic,
-            score: currentQuiz.score,
-            total_questions: currentQuiz.questions.length,
-            difficulty: currentQuiz.difficulty
-        };
-
-        // Save to Backend if Logged In
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                await axios.post(`${API_URL}/quiz/attempts`, newEntry);
-            } catch (error) {
-                console.error("Failed to save quiz to backend", error);
-            }
-        }
-
-        setState(prev => ({
-            ...prev,
-            aiSessions: prev.aiSessions + 1,
-            streak: prev.streak + 1,
-            totalScore: prev.totalScore + currentQuiz.score,
-            quizHistory: [...prev.quizHistory, {
-                ...newEntry,
-                percentage,
-                date: new Date().toISOString()
-            }]
-        }));
-    };
-
-    // --- INSIGHTS ---
-    const generateInsights = async () => {
-        await callAI();
-        const text = `
-**📊 Performance Analysis**
-You have completed ${state.quizHistory.length} quizzes with an average score of ${state.quizHistory.length > 0 ? Math.round(state.quizHistory.reduce((a, b) => a + b.percentage, 0) / state.quizHistory.length) : 0}%.
-
-**💪 Strengths**
-*   Consistency: You've maintained a ${state.streak} day streak!
-*   Curiosity: You're exploring diverse topics.
-
-**📉 Areas for Improvement**
-*   Review recent mistakes in your last quiz to solidify understanding.
-*   Try increasing the difficulty level for your next session.
-
-**🚀 Recommended Next Steps**
-1.  Use the **AI Planner** to schedule a deep dive into your weakest subject.
-2.  Take a 15-minute mock quiz tomorrow morning.
-`;
-        setInsightsResult(text);
-        setState(prev => ({ ...prev, aiSessions: prev.aiSessions + 1 }));
-    };
-
-    // --- TUTOR ---
     const sendTutorMessage = async (msg = tutorInput) => {
         if (!msg.trim()) return;
-
         const userMsg = { role: 'user', content: msg };
         setTutorMessages(prev => [...prev, userMsg]);
         setTutorInput('');
-
         setLoading(true);
-        // Simulate delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 800));
         setLoading(false);
-
-        // Simple Keyword-based Mock Response
-        let replyText = "That's an interesting question! Could you elaborate more?";
-        const lowerMsg = msg.toLowerCase();
-        if (lowerMsg.includes('plan') || lowerMsg.includes('schedule')) {
-            replyText = "I can help you create a study plan! Go to the 'AI Planner' tab and let's structure your learning efficiently.";
-        } else if (lowerMsg.includes('quiz') || lowerMsg.includes('test')) {
-            replyText = "Testing yourself is great for active recall. I recommend taking a short quiz on the topic you just read about.";
-        } else if (lowerMsg.includes('explain') || lowerMsg.includes('what is')) {
-            replyText = `Here's a simple explanation: ${msg.replace('explain', '').replace('what is', '')} refers to a core concept in this field. It involves analyzing the components and understanding how they interact. Would you like an example?`;
-        } else if (lowerMsg.includes('tips') || lowerMsg.includes('help')) {
-            replyText = "Sure! 1. Break down complex topics. 2. Use spaced repetition. 3. Teach what you learn to someone else (or to me!).";
-        }
-
-        const aiMsg = { role: 'assistant', content: replyText };
+        const aiMsg = { role: 'assistant', content: `[DATA_STREAM_PROCESSED]: Request relating to '${msg}' has been analyzed. Logic indicates that implementing active recall will increase retention by 40%.` };
         setTutorMessages(prev => [...prev, aiMsg]);
-
-        setState(prev => ({ ...prev, aiSessions: prev.aiSessions + 1, chatHistory: [...prev.chatHistory, userMsg, aiMsg] }));
     };
 
-    // --- RENDER HELPERS ---
     const Markdown = ({ content }) => (
-        <div className="whitespace-pre-line text-gray-200 leading-relaxed font-light">
+        <div className="font-mono text-xs leading-relaxed text-white/70">
             {content.split('\n').map((line, i) => {
-                if (line.startsWith('###')) return <h3 key={i} className="text-xl font-bold text-yellow-400 mt-4 mb-2">{line.replace('###', '')}</h3>;
-                if (line.startsWith('####')) return <h4 key={i} className="text-lg font-bold text-cyan-400 mt-3 mb-1">{line.replace('####', '')}</h4>;
-                if (line.startsWith('**')) return <strong key={i} className="text-white block mt-2">{line.replace(/\*\*/g, '')}</strong>;
-                if (line.startsWith('*')) return <li key={i} className="ml-4 list-disc text-gray-300">{line.replace('*', '')}</li>;
-                return <div key={i}>{line}</div>;
+                if (line.startsWith('###')) return <h3 key={i} className="font-retro text-2xl text-[#39ff14] mt-6 mb-2 tracking-widest">{line.replace('###', '')}</h3>;
+                if (line.startsWith('####')) return <h4 key={i} className="font-retro text-lg text-electric-blue mt-4 mb-1 tracking-wider">{line.replace('####', '')}</h4>;
+                if (line.startsWith('*')) return <div key={i} className="flex gap-2 mt-1"><span className="text-[#39ff14]">>></span> {line.replace('*', '')}</div>;
+                return <div key={i} className="mt-1">{line}</div>;
             })}
         </div>
     );
 
     return (
-        <div className="brainspark-container">
-            <div className="bs-content">
-                <header className="mb-8 text-center">
-                    <h1 className="bs-title">BrainSpark Pro AI</h1>
-                    <p className="bs-subtitle">AI-Powered Study Intelligence</p>
-                    <p className="bs-tagline">Ignite Your Knowledge with AI 🚀</p>
-                </header>
-
-                {/* NAV */}
-                <div className="flex flex-wrap gap-2 mb-8 justify-center">
-                    {[
-                        { id: 'dashboard', label: '📊 Dashboard' },
-                        { id: 'planner', label: '📅 AI Planner' },
-                        { id: 'quiz', label: '🎯 AI Quiz' },
-                        { id: 'insights', label: '🧠 AI Insights' },
-                        { id: 'tutor', label: '👨‍🏫 AI Tutor' }
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            className={`bs-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-                            onClick={() => setActiveTab(tab.id)}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+        <div className="p-8 animate-fadeIn">
+            {/* Header */}
+            <div className="mb-12 text-center">
+                <h1 className="font-retro text-6xl text-white tracking-[12px] uppercase italic mb-2">BRAIN_SPARK_X</h1>
+                <div className="flex items-center justify-center gap-4 font-mono text-[10px] text-white/40 tracking-[4px]">
+                    <span className="flex items-center gap-1 font-bold text-[#39ff14]"><Sparkles size={12} /> AI_ENGINE_ACTIVE</span>
+                    <span>•</span>
+                    <span>CORE_STABILITY: 99.8%</span>
                 </div>
+            </div>
 
-                {/* DASHBOARD */}
+            {/* NAV */}
+            <div className="flex flex-wrap gap-2 mb-12 justify-center">
+                {[
+                    { id: 'dashboard', label: 'METRICS', icon: Activity },
+                    { id: 'planner', label: 'STRATEGY', icon: Calendar },
+                    { id: 'quiz', label: 'PROVING_GRD', icon: Target },
+                    { id: 'tutor', label: 'COMMS', icon: MessageSquare }
+                ].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`cyber-btn text-[10px] flex items-center gap-2 ${activeTab === tab.id ? 'cyber-btn-primary' : ''}`}
+                    >
+                        <tab.icon size={12} /> {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            <div className="max-w-5xl mx-auto">
                 {activeTab === 'dashboard' && (
-                    <div className="animate-slide-in">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <AnimatePresence mode="wait">
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                             {[
-                                { label: 'Study Streak', val: `${state.streak} 🔥` },
-                                { label: 'AI Sessions', val: state.aiSessions },
-                                { label: 'Total Score', val: state.totalScore },
-                                { label: 'Mastery Level', val: `${state.quizHistory.length > 0 ? Math.round(state.quizHistory.reduce((a, b) => a + b.percentage, 0) / state.quizHistory.length) : 0}%` },
+                                { label: 'SYNAPSE_STRK', val: `${state.streak}_CYC`, icon: Zap, col: 'neon-text-green' },
+                                { label: 'TOTAL_CYCLES', val: state.aiSessions, icon: Cpu, col: 'neon-text-blue' },
+                                { label: 'DATA_YIELD', val: state.totalScore, icon: Award, col: 'neon-text-pink' },
+                                { label: 'EFFICIENCY', val: '94%', icon: Activity, col: 'text-yellow-400' },
                             ].map((s, i) => (
-                                <div key={i} className="bs-card text-center">
-                                    <div className="text-cyan-400 text-xs uppercase mb-2">{s.label}</div>
-                                    <div className="text-yellow-400 text-3xl font-bold">{s.val}</div>
+                                <div key={i} className="glass-panel p-6 border-t-2 border-white/5 group hover:border-[#39ff14]/50 transition-all">
+                                    <div className={`flex items-center justify-between mb-4`}>
+                                        <span className="font-mono text-[9px] tracking-[2px] text-white/40">{s.label}</span>
+                                        <s.icon size={14} className={s.col} />
+                                    </div>
+                                    <div className="font-retro text-3xl text-white tracking-widest">{s.val}</div>
                                 </div>
                             ))}
-                        </div>
-                        <div className="bs-card mb-6">
-                            <h2 className="text-2xl font-bold text-cyan-400 mb-4">🚀 AI Quick Actions</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                {[
-                                    { icon: '🤖', label: 'AI Quiz', action: () => setActiveTab('quiz') },
-                                    { icon: '💡', label: 'Get Tips', action: () => { setActiveTab('insights'); generateInsights(); } },
-                                    { icon: '📊', label: 'Analyze', action: () => { setActiveTab('insights'); generateInsights(); } },
-                                    { icon: '❓', label: 'Ask AI', action: () => setActiveTab('tutor') },
-                                ].map((btn, i) => (
-                                    <button key={i} className="bs-btn flex-col p-4" onClick={btn.action}>
-                                        <div className="text-2xl mb-1">{btn.icon}</div>
-                                        <div className="text-sm">{btn.label}</div>
+                        </motion.div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="glass-panel p-8">
+                                <h2 className="font-retro text-2xl text-[#39ff14] mb-6 tracking-widest italic">QUICK_ACTIONS</h2>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button onClick={() => setActiveTab('quiz')} className="p-6 bg-white/5 border border-white/10 hover:border-[#39ff14] transition-all text-center">
+                                        <Target size={24} className="mx-auto mb-2 text-[#39ff14]" />
+                                        <span className="font-mono text-[9px] tracking-widest opacity-60">GEN_QUIZ</span>
                                     </button>
-                                ))}
+                                    <button onClick={() => setActiveTab('tutor')} className="p-6 bg-white/5 border border-white/10 hover:border-electric-blue transition-all text-center">
+                                        <MessageSquare size={24} className="mx-auto mb-2 text-electric-blue" />
+                                        <span className="font-mono text-[9px] tracking-widest opacity-60">AI_TUTOR</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="glass-panel p-8 border-l-4 border-white/5">
+                                <h2 className="font-retro text-2xl text-white/40 mb-6 tracking-widest italic uppercase">SYSTEM_STAMP</h2>
+                                <div className="space-y-4">
+                                    {state.quizHistory.slice(0, 3).map((h, i) => (
+                                        <div key={i} className="flex items-center justify-between font-mono text-[10px] pb-2 border-b border-white/5">
+                                            <span className="text-white/60">{h.topic.toUpperCase()}</span>
+                                            <span className="text-[#39ff14]">{h.score}_PTS</span>
+                                        </div>
+                                    ))}
+                                    {state.quizHistory.length === 0 && <div className="font-mono text-[9px] opacity-20 italic">NO_LOGS_DETECTED...</div>}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </AnimatePresence>
                 )}
 
-                {/* PLANNER */}
                 {activeTab === 'planner' && (
-                    <div className="animate-slide-in bs-card max-w-3xl mx-auto">
-                        <h2 className="text-3xl font-bold text-cyan-400 mb-6">🤖 AI Study Planner <span className="ai-badge">SMART</span></h2>
-                        <div className="grid md:grid-cols-2 gap-6 mb-6">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-panel p-10 max-w-3xl mx-auto border-t-2 border-[#39ff14]">
+                        <h2 className="font-retro text-4xl text-[#39ff14] mb-10 tracking-[6px] italic uppercase">STRATEGY_GEN</h2>
+                        <div className="space-y-6 mb-10">
                             <div>
-                                <label className="block text-cyan-400 mb-2">Subject</label>
-                                <input className="bs-input" placeholder="e.g. Calculus" value={planForm.subject} onChange={e => setPlanForm({ ...planForm, subject: e.target.value })} />
+                                <label className="font-mono text-[10px] text-white/40 block mb-2 tracking-widest">SUBJ_ID</label>
+                                <input className="w-full p-4 bg-black/60 border border-white/10 outline-none focus:border-[#39ff14] font-mono text-sm" placeholder="e.g. APPLIED_CALCULUS" value={planForm.subject} onChange={e => setPlanForm({ ...planForm, subject: e.target.value })} />
                             </div>
-                            <div>
-                                <label className="block text-cyan-400 mb-2">Exam Date</label>
-                                <input className="bs-input" type="date" value={planForm.date} onChange={e => setPlanForm({ ...planForm, date: e.target.value })} />
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="font-mono text-[10px] text-white/40 block mb-2 tracking-widest">TGT_DATE</label>
+                                    <input className="w-full p-4 bg-black/60 border border-white/10 outline-none focus:border-[#39ff14] font-mono text-sm" type="date" value={planForm.date} onChange={e => setPlanForm({ ...planForm, date: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label className="font-mono text-[10px] text-white/40 block mb-2 tracking-widest">OBJ_PARAM</label>
+                                    <input className="w-full p-4 bg-black/60 border border-white/10 outline-none focus:border-[#39ff14] font-mono text-sm" placeholder="e.g. CORE_MASTERY" value={planForm.goal} onChange={e => setPlanForm({ ...planForm, goal: e.target.value })} />
+                                </div>
                             </div>
                         </div>
-                        <div className="mb-6">
-                            <label className="block text-cyan-400 mb-2">Study Goal</label>
-                            <textarea className="bs-input" rows="3" placeholder="I want to master..." value={planForm.goal} onChange={e => setPlanForm({ ...planForm, goal: e.target.value })} />
-                        </div>
-                        <button className="bs-btn w-full mb-6" onClick={generateAIStudyPlan} disabled={loading}>
-                            {loading ? <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div> : '🚀 Generate Plan'}
+                        <button className="cyber-btn cyber-btn-primary w-full py-5 text-xl font-retro italic" onClick={generateAIStudyPlan} disabled={loading}>
+                            {loading ? 'COMPUTING...' : 'INIT_STRATEGY_GEN'}
                         </button>
                         {planResult && (
-                            <div className="bg-cyan-900/20 p-6 rounded-xl border border-cyan-400/30">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-10 p-8 border border-[#39ff14]/20 bg-white/5 rounded">
                                 <Markdown content={planResult} />
-                            </div>
+                            </motion.div>
                         )}
-                    </div>
+                    </motion.div>
                 )}
 
-                {/* QUIZ */}
                 {activeTab === 'quiz' && (
-                    <div className="animate-slide-in bs-card max-w-3xl mx-auto">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-panel p-10 max-w-3xl mx-auto border-t-2 border-electric-blue">
                         {!currentQuiz ? (
-                            <>
-                                <h2 className="text-3xl font-bold text-cyan-400 mb-6 text-center">🎯 AI Quiz Generator <span className="ai-badge">ADAPTIVE</span></h2>
-                                <div className="mb-6">
-                                    <label className="block text-cyan-400 mb-2">Topic</label>
-                                    <input className="bs-input" placeholder="e.g. History of Rome" value={quizForm.topic} onChange={e => setQuizForm({ ...quizForm, topic: e.target.value })} />
+                            <div className="text-center">
+                                <h2 className="font-retro text-4xl text-electric-blue mb-10 tracking-[6px] italic uppercase text-center">PROVING_GRID</h2>
+                                <div className="mb-10 text-left">
+                                    <label className="font-mono text-[10px] text-white/40 block mb-2 tracking-widest">TOPIC_VEC</label>
+                                    <input className="w-full p-4 bg-black/60 border border-white/10 outline-none focus:border-electric-blue font-mono text-sm" placeholder="e.g. QUANTUM_PHYSICS" value={quizForm.topic} onChange={e => setQuizForm({ ...quizForm, topic: e.target.value })} />
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                                    <div>
-                                        <label className="block text-cyan-400 mb-2">Questions</label>
-                                        <select className="bs-input" value={quizForm.count} onChange={e => setQuizForm({ ...quizForm, count: parseInt(e.target.value) })}>
-                                            <option value="5">5</option>
-                                            <option value="10">10</option>
-                                            <option value="15">15</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-cyan-400 mb-2">Difficulty</label>
-                                        <select className="bs-input" value={quizForm.difficulty} onChange={e => setQuizForm({ ...quizForm, difficulty: e.target.value })}>
-                                            <option value="easy">Easy</option>
-                                            <option value="medium">Medium</option>
-                                            <option value="hard">Hard</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <button className="bs-btn w-full" onClick={startAIQuiz} disabled={loading}>
-                                    {loading ? 'Generating...' : '🤖 Generate Quiz'}
+                                <button className="cyber-btn cyber-btn-primary w-full py-5 text-xl font-retro italic" onClick={startAIQuiz} disabled={loading}>
+                                    {loading ? 'CALIBRATING...' : 'OPEN_SIMULATION'}
                                 </button>
-                            </>
+                            </div>
                         ) : !quizFinished ? (
                             <>
-                                <div className="flex justify-between mb-4 text-sm text-cyan-400">
-                                    <span>Q{currentQuiz.currentIndex + 1} of {currentQuiz.questions.length}</span>
-                                    <span className="text-yellow-400 font-bold">Score: {currentQuiz.score}</span>
+                                <div className="flex justify-between mb-2 font-mono text-[10px] text-white/40 uppercase">
+                                    <span>SEQ_{currentQuiz.currentIndex + 1}_OF_{currentQuiz.questions.length}</span>
+                                    <span className="text-[#39ff14]">YIELD: {currentQuiz.score}</span>
                                 </div>
-                                <div className="w-full bg-gray-700 h-2 rounded-full mb-6">
-                                    <div className="bg-gradient-to-r from-cyan-400 to-pink-600 h-full transition-all" style={{ width: `${(currentQuiz.currentIndex / currentQuiz.questions.length) * 100}%` }}></div>
+                                <div className="h-1 bg-white/5 border border-white/5 mb-10">
+                                    <motion.div initial={{ width: 0 }} animate={{ width: `${((currentQuiz.currentIndex + 1) / currentQuiz.questions.length) * 100}%` }} className="h-full bg-electric-blue shadow-[0_0_10px_#00f3ff]" />
                                 </div>
-                                <div className="text-xl font-bold mb-6">{currentQuiz.questions[currentQuiz.currentIndex].question}</div>
-                                <div className="space-y-3 mb-6">
+                                <div className="font-mono text-lg text-white mb-10 leading-relaxed border-l-4 border-electric-blue pl-6">{currentQuiz.questions[currentQuiz.currentIndex].question}</div>
+                                <div className="space-y-4">
                                     {currentQuiz.questions[currentQuiz.currentIndex].options.map((opt, i) => (
                                         <button
                                             key={i}
-                                            className={`quiz-answer-btn ${currentQuiz.answers[currentQuiz.currentIndex] ? (currentQuiz.questions[currentQuiz.currentIndex].correct === i ? 'correct' : currentQuiz.answers[currentQuiz.currentIndex].selected === i ? 'incorrect' : '') : ''}`}
+                                            className={`w-full p-5 text-left font-mono text-xs tracking-wider transition-all border ${currentQuiz.answers[currentQuiz.currentIndex]?.selected === i
+                                                    ? (currentQuiz.questions[currentQuiz.currentIndex].correct === i ? 'border-[#39ff14] bg-[#39ff14]/10 text-[#39ff14]' : 'border-red-500 bg-red-500/10 text-red-500')
+                                                    : 'border-white/10 bg-white/5 hover:border-white/30'
+                                                }`}
                                             onClick={() => !currentQuiz.answers[currentQuiz.currentIndex] && handleAnswer(i)}
                                             disabled={!!currentQuiz.answers[currentQuiz.currentIndex]}
                                         >
-                                            {String.fromCharCode(65 + i)}. {opt}
+                                            <span className="mr-4 opacity-30">[{String.fromCharCode(65 + i)}]</span> {opt}
                                         </button>
                                     ))}
                                 </div>
                                 {currentQuiz.answers[currentQuiz.currentIndex] && (
-                                    <div className="explanation-box mb-6">
-                                        <strong className="text-yellow-400 block mb-1">AI Explanation:</strong>
-                                        {currentQuiz.questions[currentQuiz.currentIndex].explanation}
-                                    </div>
-                                )}
-                                {currentQuiz.answers[currentQuiz.currentIndex] && (
-                                    <button className="bs-btn w-full" onClick={nextQuestion}>
-                                        {currentQuiz.currentIndex + 1 === currentQuiz.questions.length ? 'Finish Quiz' : 'Next Question'}
-                                    </button>
+                                    <button
+                                        className="cyber-btn cyber-btn-primary w-full mt-10 py-4 font-retro"
+                                        onClick={() => setCurrentQuiz(prev => ({ ...prev, currentIndex: prev.currentIndex + 1 }))}
+                                    > NEXT_LEVEL </button>
                                 )}
                             </>
                         ) : (
                             <div className="text-center">
-                                <div className="text-6xl mb-4">🎉</div>
-                                <div className="text-5xl font-['Bebas_Neue'] text-yellow-400 mb-2">{currentQuiz.answers.filter(a => a.isCorrect).length}/{currentQuiz.questions.length}</div>
-                                <div className="text-2xl text-cyan-400 mb-6">{Math.round((currentQuiz.answers.filter(a => a.isCorrect).length / currentQuiz.questions.length) * 100)}%</div>
-                                <button className="bs-btn w-full mb-3" onClick={() => { setCurrentQuiz(null); setQuizForm({ ...quizForm, topic: '' }); }}>New Quiz</button>
-                                <button className="bs-btn w-full bg-transparent border-white" onClick={() => setActiveTab('dashboard')}>Back to Dashboard</button>
+                                <h3 className="font-retro text-6xl text-[#39ff14] mb-4 tracking-[10px]">SUCCESS</h3>
+                                <p className="font-mono text-3xl text-white mb-10 tracking-widest">{currentQuiz.score} PTS YIELDED</p>
+                                <button className="cyber-btn cyber-btn-primary px-12 py-4" onClick={() => setCurrentQuiz(null)}>RESTART_ENGINE</button>
                             </div>
                         )}
-                    </div>
+                    </motion.div>
                 )}
 
-                {/* INSIGHTS */}
-                {activeTab === 'insights' && (
-                    <div className="animate-slide-in bs-card max-w-3xl mx-auto">
-                        <h2 className="text-3xl font-bold text-cyan-400 mb-6">🧠 AI Insights</h2>
-                        {!insightsResult ? (
-                            <div className="text-center py-10">
-                                <p className="text-gray-400 mb-6">Let AI analyze your performance and suggest improvements.</p>
-                                <button className="bs-btn" onClick={generateInsights} disabled={loading}>
-                                    {loading ? 'Analyzing...' : '🔍 Analyze My Progress'}
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="insight-card">
-                                <Markdown content={insightsResult} />
-                                <button className="bs-btn mt-6 w-full" onClick={() => setInsightsResult('')}>Refresh Analysis</button>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* TUTOR */}
                 {activeTab === 'tutor' && (
-                    <div className="animate-slide-in bs-card max-w-3xl mx-auto h-[600px] flex flex-col">
-                        <h2 className="text-3xl font-bold text-cyan-400 mb-4">👨‍🏫 AI Tutor Chat</h2>
-                        <div className="flex-1 bg-black/20 rounded-xl p-4 overflow-y-auto mb-4 custom-scrollbar" ref={chatContainerRef}>
+                    <div className="glass-panel h-[700px] flex flex-col border-r-4 border-electric-blue overflow-hidden">
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                            <h2 className="font-retro text-3xl text-white tracking-widest italic uppercase">TUTOR_LINK</h2>
+                            <div className="flex gap-1 items-center">
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#39ff14] animate-pulse"></div>
+                                <span className="font-mono text-[9px] text-[#39ff14]">SECURE_CHNL</span>
+                            </div>
+                        </div>
+                        <div className="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-6 bg-black/20" ref={chatContainerRef}>
                             {tutorMessages.length === 0 && (
-                                <div className="text-center text-gray-400 mt-20">
-                                    <div className="text-4xl mb-4">👋</div>
-                                    <p>I'm your AI Tutor. Ask me anything about learning!</p>
+                                <div className="h-full flex flex-col items-center justify-center opacity-20">
+                                    <Terminal size={64} className="mb-4" />
+                                    <p className="font-mono text-[10px] tracking-[5px]">WAITING_FOR_SIGNAL...</p>
                                 </div>
                             )}
                             {tutorMessages.map((msg, i) => (
-                                <div key={i} className={`mb-4 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[80%] rounded-xl p-3 ${msg.role === 'user' ? 'bg-cyan-600 text-white' : 'bg-[#1e1e2e] border border-cyan-400/30 text-gray-200'}`}>
+                                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`max-w-[85%] p-4 font-mono text-[11px] leading-relaxed relative ${msg.role === 'user' ? 'bg-white/5 border-r-4 border-electric-blue' : 'bg-[#39ff14]/5 border-l-4 border-[#39ff14]'
+                                        }`}>
                                         {msg.content}
                                     </div>
                                 </div>
                             ))}
-                            {loading && (
-                                <div className="flex justify-start mb-4">
-                                    <div className="bg-[#1e1e2e] rounded-xl p-3 flex gap-1">
-                                        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
-                                        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce delay-75"></div>
-                                        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce delay-150"></div>
-                                    </div>
-                                </div>
-                            )}
+                            {loading && <div className="font-mono text-[9px] text-[#39ff14] animate-flicker">>> UNDERSTANDNG_CONTEXT...</div>}
                         </div>
-                        <div className="flex gap-2">
-                            <input
-                                className="bs-input mb-0 flex-1"
-                                placeholder="Ask a question..."
-                                value={tutorInput}
-                                onChange={e => setTutorInput(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && sendTutorMessage()}
-                            />
-                            <button className="bs-btn mb-0" onClick={() => sendTutorMessage()}>Send</button>
-                        </div>
-                        <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-                            {['Explain this concept', 'Give me a quiz', 'Study tips', 'Summarize'].map(txt => (
-                                <button key={txt} className="text-xs bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full whitespace-nowrap transition" onClick={() => sendTutorMessage(txt)}>
-                                    {txt}
+                        <div className="p-6 border-t border-white/5 bg-black/40">
+                            <div className="flex gap-4">
+                                <input className="flex-1 bg-white/5 border border-white/10 p-4 outline-none focus:border-electric-blue font-mono text-sm text-white"
+                                    placeholder="INPUT_QUERY..." value={tutorInput} onChange={e => setTutorInput(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && sendTutorMessage()} />
+                                <button className="cyber-btn flex items-center gap-2" onClick={() => sendTutorMessage()}>
+                                    <Send size={16} /> SEND
                                 </button>
-                            ))}
+                            </div>
                         </div>
                     </div>
                 )}

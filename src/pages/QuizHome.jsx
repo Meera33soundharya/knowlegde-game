@@ -318,6 +318,7 @@ const QuizApp = () => {
   const [studyNotes, setStudyNotes] = useState("");
   const [studyMode, setStudyMode] = useState("quiz"); // 'quiz', 'flashcards', 'notes', 'sprint'
   const [timeLeft, setTimeLeft] = useState(60);
+  const [questionTimeLeft, setQuestionTimeLeft] = useState(20);
   const [isGameActive, setIsGameActive] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -342,7 +343,8 @@ const QuizApp = () => {
   const [wrongMatch, setWrongMatch] = useState(null); // New state for mismatch feedback
   const [usedQuestions, setUsedQuestions] = useState(new Set()); // Track used questions
   const [showReady, setShowReady] = useState(true)
-  const [showDashboardPage, setShowDashboardPage] = useState(false)
+  // Show dashboard on open by default for improved UX
+  const [showDashboardPage, setShowDashboardPage] = useState(true)
   const [showBrainQuest, setShowBrainQuest] = useState(false)
   const [showInteractiveDashboard, setShowInteractiveDashboard] = useState(false)
 
@@ -668,9 +670,9 @@ ${topic} is a broad subject with many interesting applications. To get detailed,
   useEffect(() => {
     if (mode !== 'quiz' || studyMode === 'sprint') return;
 
-    setTimeLeft(20);
+    setQuestionTimeLeft(20);
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
+      setQuestionTimeLeft(prev => {
         if (prev <= 1) {
           // Time's up: show explanation and record as incorrect
           setShowExplanation(true);
@@ -680,7 +682,6 @@ ${topic} is a broad subject with many interesting applications. To get detailed,
           }
           // schedule auto next question after short delay
           setTimeout(() => {
-            // only proceed if still on quiz
             try { nextQuestion() } catch (e) { }
           }, 1200);
           return 0;
@@ -790,8 +791,8 @@ ${topic} is a broad subject with many interesting applications. To get detailed,
 
   if (showDashboardPage) {
     return (
-      <DashboardPage onClose={() => setShowDashboardPage(false)} score={score} total={quizQuestions.length} userAnswers={userAnswers} timeLeft={timeLeft} history={history} />
-    )
+        <DashboardPage onClose={() => setShowDashboardPage(false)} score={score} total={quizQuestions.length} userAnswers={userAnswers} timeLeft={studyMode === 'sprint' ? timeLeft : questionTimeLeft} history={history} />
+      )
   }
 
   if (showBrainQuest) {
@@ -1025,7 +1026,7 @@ ${topic} is a broad subject with many interesting applications. To get detailed,
             </div>
           </div>
 
-          <Dashboard score={score} total={quizQuestions.length} userAnswers={userAnswers} timeLeft={timeLeft} />
+          <Dashboard score={score} total={quizQuestions.length} userAnswers={userAnswers} timeLeft={studyMode === 'sprint' ? timeLeft : questionTimeLeft} />
 
           {/* Recent Activity (History) with Search */}
           {history.length > 0 && (
@@ -1214,7 +1215,7 @@ ${topic} is a broad subject with many interesting applications. To get detailed,
             <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-white/5 text-yellow-300' : 'bg-white/30 text-black'} font-bold`}>🪙 {coins}</div>
           </div>
           <div className="fixed top-4 right-4 z-50">
-            <div className={`p-2 rounded-lg ${timeLeft < 6 ? 'bg-red-500 text-white' : (isDarkMode ? 'bg-indigo-900/60 text-indigo-200' : 'bg-white/30 text-black')} font-bold`}>{timeLeft}s</div>
+            <div className={`p-2 rounded-lg ${(studyMode === 'sprint' ? timeLeft : questionTimeLeft) < 6 ? 'bg-red-500 text-white' : (isDarkMode ? 'bg-indigo-900/60 text-indigo-200' : 'bg-white/30 text-black')} font-bold`}>{studyMode === 'sprint' ? timeLeft : questionTimeLeft}s</div>
           </div>
           <div className="max-w-2xl mx-auto">
             <div className="bg-transparent mt-8 text-center mb-6">
@@ -1275,7 +1276,7 @@ ${topic} is a broad subject with many interesting applications. To get detailed,
             <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-white/5 text-yellow-300' : 'bg-white/30 text-black'} font-bold`}>🪙 {coins}</div>
           </div>
           <div className="fixed top-4 right-4 z-50">
-            <div className={`p-2 rounded-lg ${timeLeft < 6 ? 'bg-red-500 text-white' : (isDarkMode ? 'bg-indigo-900/60 text-indigo-200' : 'bg-white/30 text-black')} font-bold`}>{timeLeft}s</div>
+            <div className={`p-2 rounded-lg ${(studyMode === 'sprint' ? timeLeft : questionTimeLeft) < 6 ? 'bg-red-500 text-white' : (isDarkMode ? 'bg-indigo-900/60 text-indigo-200' : 'bg-white/30 text-black')} font-bold`}>{studyMode === 'sprint' ? timeLeft : questionTimeLeft}s</div>
           </div>
           <div className="max-w-4xl mx-auto">
             <div className={`rounded-2xl shadow-2xl p-8 mt-8 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white'}`}>
@@ -1339,7 +1340,7 @@ ${topic} is a broad subject with many interesting applications. To get detailed,
             <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-white/5 text-yellow-300' : 'bg-white/30 text-black'} font-bold`}>🪙 {coins}</div>
           </div>
           <div className="fixed top-4 right-4 z-50">
-            <div className={`p-2 rounded-lg ${timeLeft < 6 ? 'bg-red-500 text-white' : (isDarkMode ? 'bg-indigo-900/60 text-indigo-200' : 'bg-white/30 text-black')} font-bold`}>{timeLeft}s</div>
+            <div className={`p-2 rounded-lg ${(studyMode === 'sprint' ? timeLeft : questionTimeLeft) < 6 ? 'bg-red-500 text-white' : (isDarkMode ? 'bg-indigo-900/60 text-indigo-200' : 'bg-white/30 text-black')} font-bold`}>{studyMode === 'sprint' ? timeLeft : questionTimeLeft}s</div>
           </div>
           <div className="max-w-3xl mx-auto">
             <div className={`rounded-2xl shadow-2xl p-8 mt-8 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white'}`}>
@@ -1348,7 +1349,7 @@ ${topic} is a broad subject with many interesting applications. To get detailed,
               {studyMode === 'sprint' ? (
                 <div className="flex justify-between items-center mb-6">
                   <div className={`px-4 py-2 rounded-full font-bold ${timeLeft < 10 ? 'bg-red-500 animate-pulse' : 'bg-amber-500'} text-white flex items-center`}>
-                    <Clock className="w-5 h-5 mr-2" /> {timeLeft}s
+                    <Clock className="w-5 h-5 mr-2" /> {studyMode === 'sprint' ? timeLeft : questionTimeLeft}s
                   </div>
                   <div className={`px-4 py-2 rounded-full font-bold ${isDarkMode ? 'bg-indigo-900/50 text-indigo-400' : 'bg-indigo-100 text-indigo-700'}`}>
                     Score: {score}

@@ -24,6 +24,11 @@ dist-ssr
 *.sw?
 
 dist-electron/
-
 temp_studyhub/
 trusty-studyhub/
+.env
+server/.env
+*.env
+push_log.txt
+dist.zip
+knowlegde-game/

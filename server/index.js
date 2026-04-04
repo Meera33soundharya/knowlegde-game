@@ -11,10 +11,38 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// Simple mock/proxy endpoint for generative tasks.
-// If you set GOOGLE_API_KEY in server/.env it will still return mock responses unless you implement
-// the real Google Generative API call here. This keeps the key safe on the server side.
+// AI Translation endpoint
+app.post('/api/translate', async (req, res) => {
+  try {
+    const { text = '', targetLanguage = 'English' } = req.body || {}
+    const apiKey = process.env.GOOGLE_API_KEY
 
+    // If a real Google API key is provided in the environment, attempt a real call.
+    if (apiKey) {
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-pro"});
+        
+        const prompt = `Translate the following text to ${targetLanguage}. Return ONLY the translated text without any other comments or explanations: "${text}"`
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const translated = response.text();
+        
+        return res.json({ translated });
+      } catch (err) {
+        console.error('Google API request failed', err)
+      }
+    }
+
+    // Basic heuristics to return useful mock data for the frontend
+    return res.json({ translated: `[Mock Translation to ${targetLanguage}]: ${text}` })
+  } catch (err) {
+    console.error('server /api/translate error', err)
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Simple mock/proxy endpoint for generative tasks.
 app.post('/api/generate', async (req, res) => {
   try {
     const { prompt = '', type = 'text' } = req.body || {}

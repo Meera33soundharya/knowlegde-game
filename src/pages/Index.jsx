@@ -1,216 +1,186 @@
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Zap, BookOpen, Brain, Trophy, FileText, Rocket, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Layout from "@/components/layout/Layout";
-import {
-    Brain,
-    BookOpen,
-    Layers,
-    FileText,
-    Gamepad2,
-    Sparkles,
-    Search,
-    Zap,
-    Target,
-    TrendingUp,
-    ArrowRight,
-} from "lucide-react";
 
-const features = [
-    {
-        icon: Brain,
-        title: "AI-Powered Q&A",
-        description: "Get instant answers to your questions with our intelligent AI assistant.",
-        href: "/ask",
-        gradient: "from-primary to-[hsl(280_75%_55%)]",
-    },
-    {
-        icon: BookOpen,
-        title: "Smart Notes",
-        description: "Create, organize, and export your study notes with ease.",
-        href: "/notes",
-        gradient: "from-[hsl(172_66%_50%)] to-info",
-    },
-    {
-        icon: Layers,
-        title: "Flashcards & Quizzes",
-        description: "Master any subject with AI-generated flashcards and interactive quizzes.",
-        href: "/flashcards",
-        gradient: "from-warning to-[hsl(25_95%_53%)]",
-    },
-    {
-        icon: FileText,
-        title: "Resume Builder",
-        description: "Create professional resumes with AI-powered suggestions.",
-        href: "/resume",
-        gradient: "from-success to-[hsl(172_66%_50%)]",
-    },
-    {
-        icon: Gamepad2,
-        title: "Educational Games",
-        description: "Learn while having fun with engaging educational games.",
-        href: "/games",
-        gradient: "from-[hsl(280_75%_55%)] to-destructive",
-    },
-    {
-        icon: Target,
-        title: "Progress Tracking",
-        description: "Monitor your learning journey with detailed analytics.",
-        href: "/dashboard",
-        gradient: "from-info to-primary",
-    },
-];
+const container = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1
+        }
+    }
+};
 
-const stats = [
-    { label: "Active Students", value: "50K+", icon: TrendingUp },
-    { label: "Questions Answered", value: "1M+", icon: Sparkles },
-    { label: "Study Hours Saved", value: "100K+", icon: Zap },
-];
+const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+};
 
 export default function Index() {
     return (
-        <Layout>
-            {/* Hero Section */}
-            <section className="relative overflow-hidden">
-                {/* Background decoration */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-primary/10 blur-3xl animate-pulse-soft" />
-                    <div className="absolute top-1/2 -left-40 w-96 h-96 rounded-full bg-accent/10 blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }} />
-                    <div className="absolute -bottom-20 right-1/4 w-64 h-64 rounded-full bg-warning/10 blur-3xl animate-pulse-soft" style={{ animationDelay: '2s' }} />
-                </div>
+        <div className="min-h-screen bg-black text-white relative overflow-hidden font-sans">
+            {/* Background Elements */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-900/30 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/30 rounded-full blur-[120px]" />
+                <div className="absolute top-[40%] left-[60%] w-[20%] h-[20%] bg-pink-900/20 rounded-full blur-[100px]" />
+            </div>
 
-                <div className="container mx-auto px-4 py-20 md:py-32 relative">
-                    <div className="max-w-4xl mx-auto text-center space-y-8">
-                        {/* Badge */}
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-primary/20 animate-fade-in">
-                            <Sparkles className="w-4 h-4 text-primary" />
-                            <span className="text-sm font-medium text-secondary-foreground">
-                                AI-Powered Learning Platform
-                            </span>
+            <div className="relative z-10 container mx-auto px-4 py-8 flex flex-col items-center">
+                {/* Navbar */}
+                <nav className="w-full flex justify-between items-center mb-16 backdrop-blur-md bg-white/5 rounded-2xl px-6 py-4 border border-white/10">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                            <Sparkles className="w-5 h-5 text-white" />
                         </div>
-
-                        {/* Heading */}
-                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                            Learn Smarter,{" "}
-                            <span className="gradient-text">Not Harder</span>
-                        </h1>
-
-                        {/* Description */}
-                        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                            Your all-in-one educational companion. Ask questions, create notes,
-                            master flashcards, build resumes, and track your progress — all powered by AI.
-                        </p>
-
-                        {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                            <Link to="/onboarding">
-                                <Button variant="hero" size="xl" className="group">
-                                    <Search className="w-5 h-5" />
-                                    Start Learning
-                                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                                </Button>
-                            </Link>
-                            <Link to="/dashboard">
-                                <Button variant="outline" size="xl">
-                                    View Dashboard
-                                </Button>
-                            </Link>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="grid grid-cols-3 gap-4 md:gap-8 pt-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                            {stats.map((stat) => {
-                                const Icon = stat.icon;
-                                return (
-                                    <div key={stat.label} className="stat-card text-center">
-                                        <Icon className="w-6 h-6 text-primary mx-auto mb-2" />
-                                        <div className="text-2xl md:text-3xl font-bold gradient-text">
-                                            {stat.value}
-                                        </div>
-                                        <div className="text-xs md:text-sm text-muted-foreground">
-                                            {stat.label}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">Knowledge Game</span>
                     </div>
-                </div>
-            </section>
-
-            {/* Features Section */}
-            <section className="py-20 bg-muted/30">
-                <div className="container mx-auto px-4">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                            Everything You Need to{" "}
-                            <span className="gradient-text">Excel</span>
-                        </h2>
-                        <p className="text-muted-foreground max-w-2xl mx-auto">
-                            Powerful tools designed specifically for students to enhance learning,
-                            boost productivity, and achieve academic success.
-                        </p>
+                    <div>
+                        <Link to="/login">
+                            <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/10 mr-2">Log In</Button>
+                        </Link>
+                        <Link to="/login">
+                            <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20">Sign Up</Button>
+                        </Link>
                     </div>
+                </nav>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {features.map((feature, index) => {
-                            const Icon = feature.icon;
-                            return (
-                                <Link
-                                    key={feature.title}
-                                    to={feature.href}
-                                    className="group"
-                                    style={{ animationDelay: `${index * 0.1}s` }}
-                                >
-                                    <div className="interactive-card h-full p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30">
-                                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                                            <Icon className="w-6 h-6 text-primary-foreground" />
-                                        </div>
-                                        <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
-                                            {feature.title}
-                                        </h3>
-                                        <p className="text-muted-foreground">
-                                            {feature.description}
-                                        </p>
-                                        <div className="mt-4 flex items-center text-primary text-sm font-medium">
-                                            Get Started
-                                            <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
-                                        </div>
-                                    </div>
-                                </Link>
-                            );
-                        })}
-                    </div>
-                </div>
-            </section>
+                {/* Hero Section */}
+                <motion.div
+                    variants={container}
+                    initial="hidden"
+                    animate="show"
+                    className="text-center max-w-4xl mx-auto mb-20"
+                >
+                    <motion.div variants={item} className="mb-6 flex justify-center">
+                        <span className="px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-sm font-medium flex items-center gap-2 backdrop-blur-sm">
+                            <Sparkles className="w-4 h-4" />
+                            Welcome to the Future of Learning
+                        </span>
+                    </motion.div>
 
-            {/* CTA Section */}
-            <section className="py-20">
-                <div className="container mx-auto px-4">
-                    <div className="relative overflow-hidden rounded-3xl gradient-hero p-8 md:p-16 text-center">
-                        {/* Background pattern */}
-                        <div className="absolute inset-0 opacity-20">
-                            <div className="absolute top-10 left-10 w-32 h-32 border border-primary-foreground rounded-full" />
-                            <div className="absolute bottom-10 right-10 w-48 h-48 border border-primary-foreground rounded-full" />
-                            <div className="absolute top-1/2 left-1/4 w-24 h-24 border border-primary-foreground rounded-full" />
-                        </div>
+                    <motion.h1 variants={item} className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-blue-200">
+                        Knowledge <span className="text-purple-500">Game</span>
+                    </motion.h1>
 
-                        <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-                            <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground">
-                                Ready to Transform Your Learning?
-                            </h2>
-                            <p className="text-lg text-primary-foreground/80">
-                                Join thousands of students who are already learning smarter with EduPlatform.
+                    <motion.p variants={item} className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+                        Master new skills, challenge your friends, and build your career portfolio in one immersive platform.
+                    </motion.p>
+
+                    <motion.div variants={item} className="flex flex-wrap justify-center gap-4">
+                        <Link to="/app/arena">
+                            <Button className="h-14 px-8 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border-0 shadow-lg shadow-purple-500/25 transition-all hover:scale-105">
+                                <Rocket className="mr-2 h-5 w-5" />
+                                Enter Arena
+                            </Button>
+                        </Link>
+                        <Link to="/app/study">
+                            <Button variant="outline" className="h-14 px-8 text-lg border-purple-500/30 bg-white/5 hover:bg-white/10 text-white backdrop-blur-sm transition-all hover:scale-105">
+                                <BookOpen className="mr-2 h-5 w-5" />
+                                Start Learning
+                            </Button>
+                        </Link>
+                    </motion.div>
+                </motion.div>
+
+                {/* Feature Cards Grid */}
+                <motion.div
+                    variants={container}
+                    initial="hidden"
+                    animate="show"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl"
+                >
+                    {/* Card 1: BrainSpark Arena */}
+                    <Link to="/app/arena" className="group">
+                        <motion.div variants={item} className="h-full p-8 rounded-3xl bg-gray-900/50 border border-gray-800 hover:border-purple-500/50 transition-all duration-300 backdrop-blur-md group-hover:bg-gray-800/50 group-hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)]">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform">
+                                <Zap className="w-7 h-7 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-purple-300 transition-colors">BrainSpark Arena</h3>
+                            <p className="text-gray-400 mb-4">
+                                Compete in real-time knowledge battles, climb the leaderboards, and earn XP.
                             </p>
-                            <Link to="/ask">
-                                <Button size="xl" className="bg-card text-foreground hover:bg-card/90">
-                                    Get Started Free
-                                    <ArrowRight className="w-5 h-5 ml-2" />
+                            <div className="flex items-center text-sm text-purple-400 font-medium">
+                                Play Now <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                            </div>
+                        </motion.div>
+                    </Link>
+
+                    {/* Card 2: EduHub */}
+                    <Link to="/app/study" className="group">
+                        <motion.div variants={item} className="h-full p-8 rounded-3xl bg-gray-900/50 border border-gray-800 hover:border-pink-500/50 transition-all duration-300 backdrop-blur-md group-hover:bg-gray-800/50 group-hover:shadow-[0_0_30px_-5px_rgba(236,72,153,0.3)]">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform">
+                                <Brain className="w-7 h-7 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-pink-300 transition-colors">Study Hub</h3>
+                            <p className="text-gray-400 mb-4">
+                                Access curated learning paths, interactive quizzes, and track your progress.
+                            </p>
+                            <div className="flex items-center text-sm text-pink-400 font-medium">
+                                Start Learning <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                            </div>
+                        </motion.div>
+                    </Link>
+
+                    {/* Card 3: MegaLearn Hub */}
+                    <Link to="/app/notes" className="group">
+                        <motion.div variants={item} className="h-full p-8 rounded-3xl bg-gray-900/50 border border-gray-800 hover:border-blue-500/50 transition-all duration-300 backdrop-blur-md group-hover:bg-gray-800/50 group-hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.3)]">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform">
+                                <BookOpen className="w-7 h-7 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-blue-300 transition-colors">MegaLearn Hub</h3>
+                            <p className="text-gray-400 mb-4">
+                                Organize your notes, flashcards, and resources in one powerful workspace.
+                            </p>
+                            <div className="flex items-center text-sm text-blue-400 font-medium">
+                                Open Hub <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                            </div>
+                        </motion.div>
+                    </Link>
+
+                    {/* Card 4: Resume Builder */}
+                    <Link to="/app/resume" className="group">
+                        <motion.div variants={item} className="h-full p-8 rounded-3xl bg-gray-900/50 border border-gray-800 hover:border-green-500/50 transition-all duration-300 backdrop-blur-md group-hover:bg-gray-800/50 group-hover:shadow-[0_0_30px_-5px_rgba(34,197,94,0.3)]">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform">
+                                <FileText className="w-7 h-7 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-green-300 transition-colors">Resume Builder</h3>
+                            <p className="text-gray-400 mb-4">
+                                Craft a professional resume that highlights your skills and achievements.
+                            </p>
+                            <div className="flex items-center text-sm text-green-400 font-medium">
+                                Build Resume <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                            </div>
+                        </motion.div>
+                    </Link>
+
+                    {/* Card 5: Dashboard */}
+                    <Link to="/app" className="group md:col-span-2 lg:col-span-2">
+                        <motion.div variants={item} className="h-full p-8 rounded-3xl bg-gradient-to-br from-gray-900/80 to-purple-900/20 border border-gray-800 hover:border-purple-500/50 transition-all duration-300 backdrop-blur-md flex flex-col md:flex-row items-center gap-8 group-hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.2)]">
+                            <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-xs font-bold uppercase tracking-wider">
+                                        Your Progress
+                                    </div>
+                                </div>
+                                <h3 className="text-3xl font-bold mb-4 text-white">Interactive Dashboard</h3>
+                                <p className="text-gray-400 mb-6">
+                                    Get a comprehensive overview of your learning journey, track your stats, and see where you stand among peers.
+                                </p>
+                                <Button className="bg-white text-black hover:bg-gray-200 font-bold px-6">
+                                    Go to Dashboard
                                 </Button>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </Layout>
+                            </div>
+                            <div className="hidden md:flex items-center justify-center">
+                                <Trophy className="w-32 h-32 text-purple-500/20 group-hover:text-purple-500/40 transition-colors duration-500" />
+                            </div>
+                        </motion.div>
+                    </Link>
+
+                </motion.div>
+            </div>
+        </div>
     );
 }

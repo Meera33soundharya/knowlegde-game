@@ -13,7 +13,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarEleme
 
 const InteractiveDashboard = ({ onClose, history = [], coins = 0 }) => {
     const [timeRange, setTimeRange] = useState('week');
-    const [selectedView, setSelectedView] = useState('overview'); // overview, analytics, achievements, activity
+    const [selectedView, setSelectedView] = useState('overview'); // overview, analytics, achievements, activity, community
     const [animateStats, setAnimateStats] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
@@ -89,6 +89,22 @@ const InteractiveDashboard = ({ onClose, history = [], coins = 0 }) => {
             ],
             milestones: [
                 { id: 1, title: 'Joined', date: '2026-02-01', icon: '🚀' }
+            ],
+            leaderboard: [
+                { rank: 1, name: 'AlexTheGenius', score: 12500, avatar: '👤' },
+                { rank: 2, name: 'StudyMaster99', score: 11200, avatar: '📚' },
+                { rank: 3, name: 'QuizWizard', score: 10850, avatar: '🧙‍♂️' },
+                { rank: 4, name: 'Brainiac', score: 9500, avatar: '🧠' },
+                { rank: 5, name: 'You', score: coins * 10, avatar: '😊', highlight: true },
+            ],
+            friendsActivity: [
+                { id: 1, user: 'Sarah', action: 'completed a Python Quiz', time: '2h ago' },
+                { id: 2, user: 'Mike', action: 'leveled up to Level 5', time: '4h ago' },
+                { id: 3, user: 'Emma', action: 'earned the "Speed Demon" badge', time: '1d ago' },
+            ],
+            activeChallenges: [
+                { id: 1, title: 'Weekend Warrior', description: 'Complete 5 quizzes this weekend', progress: 3, total: 5, reward: '500 Coins' },
+                { id: 2, title: 'Perfect Streak', description: 'Get 100% on 3 quizzes in a row', progress: 1, total: 3, reward: 'Rare Badge' },
             ]
         };
     }, [history, coins]);
@@ -362,7 +378,8 @@ const InteractiveDashboard = ({ onClose, history = [], coins = 0 }) => {
                         { id: 'overview', label: 'Overview', icon: BarChart3 },
                         { id: 'analytics', label: 'Analytics', icon: TrendingUp },
                         { id: 'achievements', label: 'Achievements', icon: Trophy },
-                        { id: 'activity', label: 'Activity', icon: Calendar }
+                        { id: 'activity', label: 'Activity', icon: Calendar },
+                        { id: 'community', label: 'Community', icon: Users }
                     ].map(view => (
                         <button
                             key={view.id}
@@ -673,6 +690,109 @@ const InteractiveDashboard = ({ onClose, history = [], coins = 0 }) => {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Community View */}
+                {selectedView === 'community' && (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Leaderboard */}
+                            <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 shadow-lg`}>
+                                <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                                    <Trophy className="w-5 h-5 text-yellow-500" />
+                                    Global Leaderboard
+                                </h3>
+                                <div className="space-y-3">
+                                    {stats.leaderboard.map((user, index) => (
+                                        <div key={index} className={`flex items-center justify-between p-3 rounded-xl ${user.highlight
+                                            ? (isDarkMode ? 'bg-indigo-900/50 border border-indigo-500' : 'bg-indigo-50 border border-indigo-200')
+                                            : (isDarkMode ? 'bg-gray-700' : 'bg-gray-50')
+                                            } ${index < 3 ? 'transform hover:scale-105 transition-transform' : ''}`}>
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                                                    index === 1 ? 'bg-gray-200 text-gray-700' :
+                                                        index === 2 ? 'bg-orange-100 text-orange-700' :
+                                                            (isDarkMode ? 'bg-gray-600 text-gray-300' : 'bg-white text-gray-500')
+                                                    }`}>
+                                                    {user.rank}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xl">{user.avatar}</span>
+                                                    <span className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                                                        {user.name} {user.highlight && '(You)'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="font-bold flex items-center gap-1 text-indigo-500">
+                                                {user.score.toLocaleString()} <span className="text-xs text-gray-400">XP</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Active Challenges */}
+                            <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 shadow-lg`}>
+                                <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                                    <Target className="w-5 h-5 text-red-500" />
+                                    Active Challenges
+                                </h3>
+                                <div className="space-y-4">
+                                    {stats.activeChallenges.map(challenge => (
+                                        <div key={challenge.id} className={`p-4 rounded-xl border-l-4 border-red-500 ${isDarkMode ? 'bg-gray-700' : 'bg-red-50'}`}>
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <h4 className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{challenge.title}</h4>
+                                                    <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{challenge.description}</p>
+                                                </div>
+                                                <span className="text-xs font-bold bg-white px-2 py-1 rounded text-red-600 shadow-sm border border-red-100">
+                                                    {challenge.reward}
+                                                </span>
+                                            </div>
+                                            <div className="mt-3">
+                                                <div className="flex justify-between text-xs mb-1">
+                                                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Progress</span>
+                                                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>{challenge.progress}/{challenge.total}</span>
+                                                </div>
+                                                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-red-500 rounded-full transition-all duration-500"
+                                                        style={{ width: `${(challenge.progress / challenge.total) * 100}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Friends Activity */}
+                            <div className={`col-span-1 lg:col-span-2 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 shadow-lg`}>
+                                <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                                    <Users className="w-5 h-5 text-green-500" />
+                                    Friends Activity
+                                </h3>
+                                <div className="space-y-3">
+                                    {stats.friendsActivity.map(activity => (
+                                        <div key={activity.id} className={`flex items-center gap-4 p-3 rounded-lg hover:bg-opacity-80 transition-colors ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-bold">
+                                                {activity.user.charAt(0)}
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                                                    <span className="font-bold">{activity.user}</span> {activity.action}
+                                                </p>
+                                                <p className="text-xs text-gray-400">{activity.time}</p>
+                                            </div>
+                                            <button className={`text-xs px-3 py-1 rounded-full border ${isDarkMode ? 'border-gray-600 hover:bg-gray-600 text-gray-300' : 'border-gray-300 hover:bg-gray-100 text-gray-600'}`}>
+                                                Cheer 🎉
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}

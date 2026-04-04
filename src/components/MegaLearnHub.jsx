@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     CreditCard, FileText, HelpCircle, Target, Brain, Shuffle,
-    Keyboard, Code, Calculator, Timer, Trophy, ArrowLeft, ArrowRight
+    Keyboard, Code, Calculator, Timer, Trophy, ArrowLeft, ArrowRight, Bot, Quote, PenTool
 } from 'lucide-react';
 import './MegaLearnHub.css';
 
@@ -87,6 +87,116 @@ const MegaLearnHub = ({ onBack, initialScreen = 'flashcards' }) => {
     const [codeState, setCodeState] = useState({ html: '<h1>Hello World</h1>', css: 'body { color: white; }', js: 'console.log("Hi");', activeTab: 'html', output: '' });
     const [calcDisplay, setCalcDisplay] = useState('0');
     const [pomodoroState, setPomodoroState] = useState({ mode: 'work', minutes: 25, seconds: 0, isRunning: false, sessions: 0 });
+
+    // ---------------------------------------------------------
+    // 7. AI BUDDY
+    // ---------------------------------------------------------
+    const [buddyState, setBuddyState] = useState({
+        messages: [{ role: 'ai', text: "Hi! I'm your AI Study Buddy. Ask me anything about your subjects, or I can quiz you!" }],
+        input: '',
+        isTyping: false
+    });
+
+    const handleBuddySend = () => {
+        if (!buddyState.input.trim()) return;
+
+        const userMsg = { role: 'user', text: buddyState.input };
+        setBuddyState(prev => ({
+            ...prev,
+            messages: [...prev.messages, userMsg],
+            input: '',
+            isTyping: true
+        }));
+
+        // Mock AI Response
+        setTimeout(() => {
+            let aiText = "That's an interesting topic! Tell me more.";
+            const lowerInput = userMsg.text.toLowerCase();
+
+            if (lowerInput.includes('quiz')) aiText = "Sure! Here's a question: What is the powerhouse of the cell?";
+            else if (lowerInput.includes('mitochondria')) aiText = "Correct! Mitochondria trigger energy production.";
+            else if (lowerInput.includes('hello') || lowerInput.includes('hi')) aiText = "Hello there! Ready to learn something new?";
+            else if (lowerInput.includes('help')) aiText = "I can help you with Flashcards, Quizzes, or just explaining complex topics. What do you need?";
+            else if (lowerInput.includes('plan')) aiText = "I can help you create a study plan. What subjects are you focusing on?";
+
+            setBuddyState(prev => ({
+                ...prev,
+                messages: [...prev.messages, { role: 'ai', text: aiText }],
+                isTyping: false
+            }));
+        }, 1500);
+    };
+
+
+
+    // ---------------------------------------------------------
+    // 8. PROVERBS (WISDOM)
+    // ---------------------------------------------------------
+    const [wisdomState, setWisdomState] = useState({
+        current: 0,
+        favorites: [],
+        list: [
+            { text: "The roots of education are bitter, but the fruit is sweet.", author: "Aristotle", meaning: "Learning is hard work, but the results are worth it." },
+            { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", author: "Mahatma Gandhi", meaning: "Embrace life and constant learning." },
+            { text: "Education is not the learning of facts, but the training of the mind to think.", author: "Albert Einstein", meaning: "Critical thinking is more important than memorization." },
+            { text: "A journey of a thousand miles begins with a single step.", author: "Lao Tzu", meaning: "Big goals are achieved by starting small." }
+        ]
+    });
+
+    // ---------------------------------------------------------
+    // 9. REWORD (SENTENCE GAME)
+    // ---------------------------------------------------------
+    const [rewordState, setRewordState] = useState({
+        sentence: "Education is the key to unlocking the world.",
+        scrambled: ["world.", "unlocking", "key", "the", "to", "is", "Education"],
+        selected: [],
+        isCorrect: null
+    });
+
+    const initReword = () => {
+        const sentences = [
+            "Practice makes a man perfect.",
+            "Time and tide wait for no man.",
+            "Knowledge is power.",
+            "Action speaks louder than words.",
+            "Better late than never."
+        ];
+        const sent = sentences[Math.floor(Math.random() * sentences.length)];
+        const words = sent.split(' ');
+        setRewordState({
+            sentence: sent,
+            scrambled: [...words].sort(() => Math.random() - 0.5),
+            selected: [],
+            isCorrect: null
+        });
+    };
+
+    const handleRewordSelect = (word) => {
+        const newSelected = [...rewordState.selected, word];
+        const newScrambled = rewordState.scrambled.filter(w => w !== word);
+
+        let correct = null;
+        if (newScrambled.length === 0) {
+            correct = newSelected.join(' ') === rewordState.sentence;
+            if (correct) setGlobalStats(gs => ({ ...gs, totalScore: gs.totalScore + 50 }));
+        }
+
+        setRewordState(prev => ({
+            ...prev,
+            selected: newSelected,
+            scrambled: newScrambled,
+            isCorrect: correct
+        }));
+    };
+
+    const resetReword = () => {
+        setRewordState(prev => ({
+            ...prev,
+            scrambled: [...prev.selected, ...prev.scrambled].sort(() => Math.random() - 0.5),
+            selected: [],
+            isCorrect: null
+        }));
+    };
 
     // ---------------------------------------------------------
     // 6. LEADERBOARD
@@ -311,6 +421,9 @@ const MegaLearnHub = ({ onBack, initialScreen = 'flashcards' }) => {
                     { id: 'calculator', label: 'CALCULATOR', icon: Calculator },
                     { id: 'pomodoro', label: 'POMODORO', icon: Timer },
                     { id: 'leaderboard', label: 'LEADERBOARD', icon: Trophy },
+                    { id: 'buddy', label: 'AI BUDDY', icon: Bot },
+                    { id: 'wisdom', label: 'PROVERBS', icon: Quote },
+                    { id: 'reword', label: 'REWORD GAME', icon: PenTool },
                 ].map(tab => (
                     <button key={tab.id} className={`mega-nav-tab ${activeScreen === tab.id ? 'active' : ''}`} onClick={() => setActiveScreen(tab.id)}>
                         <tab.icon className="w-5 h-5 mb-1" />
@@ -651,6 +764,119 @@ const MegaLearnHub = ({ onBack, initialScreen = 'flashcards' }) => {
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* AI BUDDY SCREEN */}
+                    {activeScreen === 'buddy' && (
+                        <div className="mega-card" style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
+                            <h2 className="mega-card-header">AI STUDY BUDDY</h2>
+
+                            <div className="flex-1 overflow-y-auto mb-4 p-4 bg-black/20 rounded-xl space-y-4">
+                                {buddyState.messages.map((msg, i) => (
+                                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[80%] p-3 rounded-2xl ${msg.role === 'user'
+                                            ? 'bg-purple-600 text-white rounded-tr-none'
+                                            : 'bg-gray-700 text-gray-200 rounded-tl-none'
+                                            }`}>
+                                            {msg.text}
+                                        </div>
+                                    </div>
+                                ))}
+                                {buddyState.isTyping && (
+                                    <div className="flex justify-start">
+                                        <div className="bg-gray-700 text-gray-200 p-3 rounded-2xl rounded-tl-none animate-pulse">
+                                            Thinking...
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex gap-2">
+                                <input
+                                    className="mega-input flex-1"
+                                    placeholder="Ask anything..."
+                                    value={buddyState.input}
+                                    onChange={e => setBuddyState(p => ({ ...p, input: e.target.value }))}
+                                    onKeyPress={e => e.key === 'Enter' && handleBuddySend()}
+                                />
+                                <button className="mega-btn mega-btn-primary" onClick={handleBuddySend}>SEND</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* PROVERBS SCREEN */}
+                    {activeScreen === 'wisdom' && (
+                        <div className="mega-card text-center">
+                            <h2 className="mega-card-header">DAILY WISDOM</h2>
+                            <div className="p-8">
+                                <Quote className="w-16 h-16 text-yellow-400 mx-auto mb-6 opacity-80" />
+                                <h3 className="text-3xl font-serif italic mb-6 leading-relaxed">
+                                    "{wisdomState.list[wisdomState.current].text}"
+                                </h3>
+                                <p className="text-xl text-purple-400 mb-8">- {wisdomState.list[wisdomState.current].author}</p>
+
+                                <div className="bg-white/10 p-6 rounded-xl mb-8">
+                                    <h4 className="text-sm uppercase tracking-widest text-gray-400 mb-2">Meaning</h4>
+                                    <p className="text-lg">{wisdomState.list[wisdomState.current].meaning}</p>
+                                </div>
+
+                                <div className="flex justify-center gap-4">
+                                    <button className="mega-btn mega-btn-primary" onClick={() => setWisdomState(p => ({ ...p, current: (p.current + 1) % p.list.length }))}>
+                                        NEXT QUOTE
+                                    </button>
+                                    <button className="mega-btn mega-btn-secondary">
+                                        SAVE TO FAVORITES
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* REWORD SCREEN */}
+                    {activeScreen === 'reword' && (
+                        <div className="mega-card text-center">
+                            <h2 className="mega-card-header">REWORD CHALLENGE</h2>
+                            <p className="mb-8 opacity-70">Reconstruct the sentence by clicking words in the correct order.</p>
+
+                            {/* Target Area */}
+                            <div className={`min-h-[80px] p-6 rounded-xl mb-8 border-2 transition-all ${rewordState.isCorrect === true ? 'border-green-500 bg-green-500/10' :
+                                rewordState.isCorrect === false ? 'border-red-500 bg-red-500/10' : 'border-gray-700 bg-black/30'
+                                }`}>
+                                <div className="flex flex-wrap gap-2 justify-center">
+                                    {rewordState.selected.map((word, i) => (
+                                        <span key={i} className="px-4 py-2 bg-purple-600 rounded-lg font-bold text-lg animate-fade-in">
+                                            {word}
+                                        </span>
+                                    ))}
+                                    {rewordState.selected.length === 0 && <span className="text-gray-500 italic">Select words below...</span>}
+                                </div>
+                            </div>
+
+                            {/* Result Message */}
+                            {rewordState.isCorrect !== null && (
+                                <div className={`text-2xl font-bold mb-8 ${rewordState.isCorrect ? 'text-green-400' : 'text-red-400'}`}>
+                                    {rewordState.isCorrect ? "🎉 CORRECT! +50 XP" : "❌ Incorrect Order"}
+                                </div>
+                            )}
+
+                            {/* Source Words */}
+                            <div className="flex flex-wrap gap-3 justify-center mb-10">
+                                {rewordState.scrambled.map((word, i) => (
+                                    <button
+                                        key={i}
+                                        className="px-4 py-2 bg-gray-700 hover:bg-gray-600 border-b-4 border-gray-900 active:border-b-0 active:translate-y-1 rounded-lg font-bold text-lg transition-all"
+                                        onClick={() => handleRewordSelect(word)}
+                                    >
+                                        {word}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-center gap-4">
+                                <button className="mega-btn mega-btn-secondary" onClick={resetReword}>RESET</button>
+                                <button className="mega-btn mega-btn-primary" onClick={initReword}>NEW SENTENCE</button>
+                            </div>
                         </div>
                     )}
                 </main>
